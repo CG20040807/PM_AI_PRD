@@ -17,35 +17,21 @@ product = st.text_input("输入产品名称")
 
 # Word生成
 def generate_word(text):
-
     doc = Document()
-
     doc.add_heading("AI 产品分析报告", 0)
-
     doc.add_paragraph(text)
-
     file = "prd_report.docx"
-
     doc.save(file)
-
     return file
-
 
 # PDF生成
 def generate_pdf(text):
-
     pdf = FPDF()
-
     pdf.add_page()
-
     pdf.set_font("Arial", size=12)
-
     pdf.multi_cell(0,10,text)
-
     file = "prd_report.pdf"
-
     pdf.output(file)
-
     return file
 
 
@@ -56,7 +42,7 @@ if st.button("生成分析"):
         url = "https://7fv2jsrt7q.coze.site/run"
 
         headers = {
-            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjhkMjgyYTVkLWJlMmUtNDViOS1hODFkLWM4ZGI3MTU5MmExOSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NDQ3MzAzLCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxMTkzMTM0OTQ4ODEwODA0In0.d9ORVnCAqSyhzmne1gFATy9gQrAvNsS3MU6HaK4APQVZuJnYntBHZ7KEqNAi5Krp-vGfDQtQkSaEOICMAgDNOShUd048c5yQRF7N7G8GzYpUHgD9ybROnvViTHRQHRNJsgRkaQyU-aKGETib8cSEQHHN220ZoBTfUOziyjEKFSqHAqghiE88R3tkq-LJFdybmQP2l6NZEPIt2h2VFslOVV08P0vT5uPtWGziTRfTWhxwkYvGCGNaKzBowd2ZUm-zbp8DBUj9UaEkI5P5mWL5donOHzLuNDd0AzMyx08wEPZEZBPcJXxiLuyOYeaCb6aZttiHUv85QPsCJuHatqZi2g",
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjhkMjgyYTVkLWJlMmUtNDViOS1hODFkLWM4ZGI3MTU5MmExOSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NDQ4MTUzLCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxMTk2Nzg3OTk4NTIzNDExIn0.VRx-_2ZiR5942xUiuLYWT0lEFD4rdkBVnSzwXRltQb5f63iJSp6xm_QGtIH9ih62qm9wIfWulcxqdeOKE2JfkgsU8dhRu1cEJ29c6VP27OEByZx8ZDtxUJX0hWH4FSEB4Y9hC7VPtwi7HpUI8yPILtF9PP2FAGnnvTmi1x29s6enyRGuExYU7lOccg9qiW8jKcBe_MasCLIsUSBveBUzDXH15OMS1LHfNfxfgQhKtPtksMp1ndzyTX9nvlAtiHT66oELqAiH7n_zcUDeBVXZArDt2w_pFy_bFBQSbmmPS5kY5xYUcscqFzfZZb1Lufu9V4ZnAf1rIw1bM-zptJMUHw",  # 修改为你的token
             "Content-Type": "application/json"
         }
 
@@ -77,48 +63,45 @@ if st.button("生成分析"):
 """
 
         data = {
-            "model":"gpt-4",
-            "messages":[
-                {"role":"user","content":prompt}
+            "model": "gpt-4",
+            "messages": [
+                {"role": "user", "content": prompt}
             ]
         }
 
-        response = requests.post(url,headers=headers,json=data)
-
         try:
-    response = requests.post(url, headers=headers, json=data)
-    response.raise_for_status()  # Ensure we raise an error for bad responses
+            response = requests.post(url, headers=headers, json=data)
+            response.raise_for_status()  # Ensure we raise an error for bad responses
 
-    # 打印返回内容查看实际数据结构
-    print(response.json())
+            # 打印返回内容查看实际数据结构
+            print(response.json())
 
-    # 获取返回的内容
-    response_data = response.json()
+            # 获取返回的内容
+            response_data = response.json()
 
-    # 确保返回数据结构正确
-    if "choices" in response_data and len(response_data["choices"]) > 0:
-        result = response_data["choices"][0].get("text", "No text returned.")
-    else:
-        result = "No valid content returned from the API."
+            # 确保返回数据结构正确
+            if "choices" in response_data and len(response_data["choices"]) > 0:
+                result = response_data["choices"][0].get("text", "No text returned.")
+            else:
+                result = "No valid content returned from the API."
 
-except requests.exceptions.RequestException as e:
-    result = f"请求失败，错误信息: {e}"
+        except requests.exceptions.RequestException as e:
+            result = f"请求失败，错误信息: {e}"
 
-except KeyError:
-    result = "API 返回数据格式错误，无法解析。"
+        except KeyError:
+            result = "API 返回数据格式错误，无法解析。"
 
-except Exception as e:
-    result = f"发生了一个意外错误: {e}"
+        except Exception as e:
+            result = f"发生了一个意外错误: {e}"
+
     st.success("分析完成")
 
     st.markdown("## 📄 AI分析报告")
-
     st.write(result)
 
     # 用户画像卡片
     st.markdown("## 👤 用户画像")
-
-    col1,col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
     with col1:
         st.info("""
@@ -140,20 +123,18 @@ except Exception as e:
     st.markdown("## 📊 竞品对比")
 
     data = {
-        "产品":["抖音","快手","B站"],
-        "核心功能":["短视频","短视频","视频社区"],
-        "用户群体":["大众","下沉市场","年轻人"],
-        "优势":["推荐算法强","社交关系强","内容质量高"],
-        "劣势":["内容重复","UI较旧","增长慢"]
+        "产品": ["抖音", "快手", "B站"],
+        "核心功能": ["短视频", "短视频", "视频社区"],
+        "用户群体": ["大众", "下沉市场", "年轻人"],
+        "优势": ["推荐算法强", "社交关系强", "内容质量高"],
+        "劣势": ["内容重复", "UI较旧", "增长慢"]
     }
 
     df = pd.DataFrame(data)
-
     st.table(df)
 
     # Roadmap
     st.markdown("## 🗺 产品Roadmap")
-
     st.markdown("""
 V1：核心内容浏览  
 V2：社交互动功能  
@@ -162,13 +143,12 @@ V3：商业化模块
 
     # 生成下载文件
     word_file = generate_word(result)
-
     pdf_file = generate_pdf(result)
 
-    col1,col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
     with col1:
-        with open(word_file,"rb") as f:
+        with open(word_file, "rb") as f:
             st.download_button(
                 "📄 下载Word报告",
                 f,
@@ -176,7 +156,7 @@ V3：商业化模块
             )
 
     with col2:
-        with open(pdf_file,"rb") as f:
+        with open(pdf_file, "rb") as f:
             st.download_button(
                 "📄 下载PDF报告",
                 f,
