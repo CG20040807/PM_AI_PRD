@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 from docx import Document
-from fpdf2 import FPDF
+from fpdf import FPDF
 
 # 设置页面配置
 st.set_page_config(
