@@ -32,12 +32,13 @@ def generate_pdf(text):
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.set_font("Arial", size=12)
 
-    # 使用多行文本支持换行
+    # 支持多行文本
+    pdf.set_font("Arial", size=12)
     pdf.multi_cell(0, 10, text)
 
     file = "prd_report.pdf"
     pdf.output(file)
-    
+
     return file
 
 
@@ -48,7 +49,7 @@ if st.button("生成分析"):
         url = "https://7fv2jsrt7q.coze.site/run"  # Coze API 地址，根据实际修改
 
         headers = {
-            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjhkMjgyYTVkLWJlMmUtNDViOS1hODFkLWM4ZGI3MTU5MmExOSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NDQ5MjY1LCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxMjAxNTY1NDk1MzI4ODEwIn0.ksrm_II9HNJa0DgKkxuHK_1V54v-HWORHNUqKACM1Ci1p37BI_DFyR1O62a2-TDi5J8pNOMtYc_v1XgcgCPDvYCgbIAzs7ghHeRZ5OVWwm_6yQiD3tzcTfdPYYkRWzTtUXb6zOMAariVgjPuMGKqIDVsPAIg0vyPb6itD8g-4EM9tyWdB3oEJzTjO-rX5x_8XvHFZQp1beCedpSA9AZURLE-She-0D0GJFwao8FvgkjFs6qnK5z0PlNm2Q_uSjl19Xuz316hfnW__s7KFNlhad9L6EBEourC-aj8TfLLX98yeBO-ozqPMzdaigA-JytEQkEQ8fcdrj1w-IuxkY_scg",  # 替换为你的 API Token
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjhkMjgyYTVkLWJlMmUtNDViOS1hODFkLWM4ZGI3MTU5MmExOSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NDQ4NzcwLCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxMTk5NDM5NjIwNzM1MDE2In0.d0RdRYlh0K7THRNuZXYUeCj2p0E-3D4LGMj4VBofLRB2UP-a9hDfEBoemeoC_HOduUv_UsGYpy0T2lzHrUV6Rd8vvf7JuxkhNVbTc2u3W_8tEuehSVussAHPEIxYa-2cWvOvzvz1J7wXEhcwLMp4fjj3-mb-wx1Wu1dsBoZoOsymeiLTcnhfl33Kp9b7Vf45S4r9Le8QPNTAeCcP9xS5BSVXerIx0MqSHJKgDZiFUXu_hxS5k78kI7sVuoZdD3TCRqm07MmwXTXSh4oIbmVqOw9hmVLrcyKY5_GemTD_XCtL1o-5Q-N2RB6er01IwisNg3CzTnmAgMBi1yHiz1heHA",  # 替换为你的 API Token
             "Content-Type": "application/json"
         }
 
