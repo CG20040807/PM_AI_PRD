@@ -85,7 +85,7 @@ if st.button("生成分析"):
 
         response = requests.post(url,headers=headers,json=data)
 
-        result = response.json()["choices"][0]["message"]["content"]
+        result = response.json()["choices"][0]["text"]
 
     st.success("分析完成")
 
