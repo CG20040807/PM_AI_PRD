@@ -1,80 +1,162 @@
 import streamlit as st
 import requests
-import json
+import pandas as pd
+from docx import Document
+from fpdf import FPDF
 
 st.set_page_config(
-    page_title="AI Product Manager Agent",
+    page_title="AI Product Manager Workspace",
     page_icon="🚀",
     layout="wide"
 )
 
-st.markdown("""
-<style>
+st.title("🚀 AI Product Manager Workspace")
+st.write("输入产品名称，自动生成 PRD / 用户画像 / 竞品分析 / Roadmap")
 
-body {
-background-color:#f5f7fb;
-}
+product = st.text_input("输入产品名称")
 
-.title {
-font-size:48px;
-font-weight:700;
-text-align:center;
-}
+# Word生成
+def generate_word(text):
 
-.subtitle {
-text-align:center;
-color:gray;
-margin-bottom:30px;
-}
+    doc = Document()
 
-</style>
-""", unsafe_allow_html=True)
+    doc.add_heading("AI 产品分析报告", 0)
 
-st.markdown('<div class="title">🚀 AI Product Manager Agent</div>', unsafe_allow_html=True)
+    doc.add_paragraph(text)
 
-st.markdown('<div class="subtitle">输入产品名称，自动生成PRD和竞品分析</div>', unsafe_allow_html=True)
+    file = "prd_report.docx"
 
-product = st.text_input("输入产品名称", placeholder="例如：抖音")
+    doc.save(file)
 
-generate = st.button("生成产品分析")
+    return file
 
-if generate and product:
 
-    with st.spinner("AI正在分析产品..."):
+# PDF生成
+def generate_pdf(text):
+
+    pdf = FPDF()
+
+    pdf.add_page()
+
+    pdf.set_font("Arial", size=12)
+
+    pdf.multi_cell(0,10,text)
+
+    file = "prd_report.pdf"
+
+    pdf.output(file)
+
+    return file
+
+
+if st.button("生成分析"):
+
+    with st.spinner("AI分析中..."):
 
         url = "https://7fv2jsrt7q.coze.site/run"
 
         headers = {
-            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjhkMjgyYTVkLWJlMmUtNDViOS1hODFkLWM4ZGI3MTU5MmExOSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NDQ1MjMxLCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxMTg0MjM3Mzg2ODU4NTQyIn0.pSr_emMr3DmyZBp1Ly2ckrzO-4_Ta_UFoGrPIrrMJGsZEY1KHVtByBzSh0jnoxSGeWuxplUNxQ4T35k81HF4meDxipFUSp3kWVifNoGJZIuv3_ZqKiN4gMZvtArtMWa8YdlWe8I_e5H0EDSc3sLQ_JMvG61OsVLWX6Ppv_8ANCRoErYUMD8GPa4z96Z_vmATKO16IdcR5MDbdc9ReF-S6NdDnYOfP-GCFIR14vDuiApW1rmgk-awGHhRv--gyE2DFrdQnRNJLqm9GIn8jTm9HXE6vg86m8zty3obf3RQlYjI0MfoKC0syTWUyaWxVRbyiMqfyq2mkb5oJQjjL-jPkA",
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjhkMjgyYTVkLWJlMmUtNDViOS1hODFkLWM4ZGI3MTU5MmExOSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NDQ3MzAzLCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxMTkzMTM0OTQ4ODEwODA0In0.d9ORVnCAqSyhzmne1gFATy9gQrAvNsS3MU6HaK4APQVZuJnYntBHZ7KEqNAi5Krp-vGfDQtQkSaEOICMAgDNOShUd048c5yQRF7N7G8GzYpUHgD9ybROnvViTHRQHRNJsgRkaQyU-aKGETib8cSEQHHN220ZoBTfUOziyjEKFSqHAqghiE88R3tkq-LJFdybmQP2l6NZEPIt2h2VFslOVV08P0vT5uPtWGziTRfTWhxwkYvGCGNaKzBowd2ZUm-zbp8DBUj9UaEkI5P5mWL5donOHzLuNDd0AzMyx08wEPZEZBPcJXxiLuyOYeaCb6aZttiHUv85QPsCJuHatqZi2g",
             "Content-Type": "application/json"
         }
 
+        prompt = f"""
+你是一名有10年经验的互联网产品经理。
+
+请分析产品：{product}
+
+输出内容：
+
+1 产品定位
+2 用户画像
+3 竞品分析
+4 产品功能设计
+5 PRD文档
+6 产品机会
+7 产品Roadmap
+"""
+
         data = {
-            "product_name": product
+            "model":"gpt-4",
+            "messages":[
+                {"role":"user","content":prompt}
+            ]
         }
 
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url,headers=headers,json=data)
 
-        result = response.json()
+        result = response.json()["choices"][0]["message"]["content"]
 
     st.success("分析完成")
 
-    st.markdown("## 📊 AI分析结果")
+    st.markdown("## 📄 AI分析报告")
 
-    with st.expander("🎯 产品定位分析", expanded=True):
-        st.write(result["positioning_analysis"])
+    st.write(result)
 
-    with st.expander("⚔️ 竞品分析"):
-        st.write(result["competitive_analysis"])
+    # 用户画像卡片
+    st.markdown("## 👤 用户画像")
 
-    with st.expander("📄 PRD文档"):
-        st.write(result["prd_document"])
+    col1,col2 = st.columns(2)
 
-    with st.expander("💡 产品机会分析"):
-        st.write(result["opportunity_analysis"])
+    with col1:
+        st.info("""
+用户1  
+年龄：18-25  
+职业：学生  
+需求：娱乐、社交
+""")
 
-    st.download_button(
-        "📥 下载PRD",
-        json.dumps(result, ensure_ascii=False, indent=2),
-        file_name="prd_analysis.json"
-    )
+    with col2:
+        st.info("""
+用户2  
+年龄：25-35  
+职业：白领  
+需求：资讯、学习
+""")
+
+    # 竞品对比表
+    st.markdown("## 📊 竞品对比")
+
+    data = {
+        "产品":["抖音","快手","B站"],
+        "核心功能":["短视频","短视频","视频社区"],
+        "用户群体":["大众","下沉市场","年轻人"],
+        "优势":["推荐算法强","社交关系强","内容质量高"],
+        "劣势":["内容重复","UI较旧","增长慢"]
+    }
+
+    df = pd.DataFrame(data)
+
+    st.table(df)
+
+    # Roadmap
+    st.markdown("## 🗺 产品Roadmap")
+
+    st.markdown("""
+V1：核心内容浏览  
+V2：社交互动功能  
+V3：商业化模块  
+""")
+
+    # 生成下载文件
+    word_file = generate_word(result)
+
+    pdf_file = generate_pdf(result)
+
+    col1,col2 = st.columns(2)
+
+    with col1:
+        with open(word_file,"rb") as f:
+            st.download_button(
+                "📄 下载Word报告",
+                f,
+                file_name="prd_report.docx"
+            )
+
+    with col2:
+        with open(pdf_file,"rb") as f:
+            st.download_button(
+                "📄 下载PDF报告",
+                f,
+                file_name="prd_report.pdf"
+            )
