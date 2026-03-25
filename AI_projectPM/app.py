@@ -32,13 +32,12 @@ def generate_pdf(text):
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.set_font("Arial", size=12)
 
-    # 支持多行文本
-    pdf.set_font("Arial", size=12)
+    # 使用多行文本支持换行
     pdf.multi_cell(0, 10, text)
 
     file = "prd_report.pdf"
     pdf.output(file)
-
+    
     return file
 
 
