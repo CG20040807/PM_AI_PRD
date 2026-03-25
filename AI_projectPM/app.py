@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import json
 
 st.set_page_config(
     page_title="AI Product Manager Agent",
@@ -26,26 +27,12 @@ color:gray;
 margin-bottom:30px;
 }
 
-.card {
-padding:25px;
-border-radius:12px;
-background:white;
-box-shadow:0px 4px 15px rgba(0,0,0,0.05);
-margin-bottom:20px;
-}
-
-.generate-button button{
-width:100%;
-height:50px;
-font-size:18px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="title">🚀 AI Product Manager Agent</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="subtitle">输入产品名称，自动生成PRD、用户画像、竞品分析</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">输入产品名称，自动生成PRD和竞品分析</div>', unsafe_allow_html=True)
 
 product = st.text_input("输入产品名称", placeholder="例如：抖音")
 
@@ -58,7 +45,7 @@ if generate and product:
         url = "https://7fv2jsrt7q.coze.site/run"
 
         headers = {
-            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjhkMjgyYTVkLWJlMmUtNDViOS1hODFkLWM4ZGI3MTU5MmExOSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NDQzODQyLCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxMTc4MjczODg3NjgyNTYwIn0.lfFXpK9UGxs1us52Uu-rq8GhjGxAeVPYGlVEYKhEYAt8HOF8nuXPonZDJRIe7fPFFRFzTpzifh-t6Tvb-lnHiF_53IGH5_rsX5jBEHVy6Ig6etUCpT68QWHVJjPVq_QqgVHRNqZoqCVSE_IH80D6qSPXCDB3Ls3jZvqtaXLElzMSX8pBsWQI0tL8jXJT8Nbt9ImjNBMOzTL20W6gOj2LDE0T1TWM2TyvlCpEXIICqNYZm_pmp1zAUkCw2lfea9bV9st0HsHOgS1lxKscnedphhf0CLUt73WdAHgYzIIQs8tQPtVS6AssdNrAzc_Q-5jcIybsGKYdFJl6-XH9IUeHig",
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjhkMjgyYTVkLWJlMmUtNDViOS1hODFkLWM4ZGI3MTU5MmExOSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NDQ1MjMxLCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxMTg0MjM3Mzg2ODU4NTQyIn0.pSr_emMr3DmyZBp1Ly2ckrzO-4_Ta_UFoGrPIrrMJGsZEY1KHVtByBzSh0jnoxSGeWuxplUNxQ4T35k81HF4meDxipFUSp3kWVifNoGJZIuv3_ZqKiN4gMZvtArtMWa8YdlWe8I_e5H0EDSc3sLQ_JMvG61OsVLWX6Ppv_8ANCRoErYUMD8GPa4z96Z_vmATKO16IdcR5MDbdc9ReF-S6NdDnYOfP-GCFIR14vDuiApW1rmgk-awGHhRv--gyE2DFrdQnRNJLqm9GIn8jTm9HXE6vg86m8zty3obf3RQlYjI0MfoKC0syTWUyaWxVRbyiMqfyq2mkb5oJQjjL-jPkA",
             "Content-Type": "application/json"
         }
 
@@ -68,37 +55,26 @@ if generate and product:
 
         response = requests.post(url, headers=headers, json=data)
 
-        result = response.text
+        result = response.json()
 
     st.success("分析完成")
 
     st.markdown("## 📊 AI分析结果")
 
-    st.markdown(
-        f'<div class="card">{result}</div>',
-        unsafe_allow_html=True
-    )
+    with st.expander("🎯 产品定位分析", expanded=True):
+        st.write(result["positioning_analysis"])
+
+    with st.expander("⚔️ 竞品分析"):
+        st.write(result["competitive_analysis"])
+
+    with st.expander("📄 PRD文档"):
+        st.write(result["prd_document"])
+
+    with st.expander("💡 产品机会分析"):
+        st.write(result["opportunity_analysis"])
 
     st.download_button(
-        "📥 下载PRD文档",
-        result,
-        file_name="product_analysis.md"
+        "📥 下载PRD",
+        json.dumps(result, ensure_ascii=False, indent=2),
+        file_name="prd_analysis.json"
     )
-
-else:
-
-    st.markdown("")
-
-st.markdown("---")
-
-st.markdown(
-"""
-### ✨ 功能
-
-- 自动生成 **PRD**
-- 分析 **用户画像**
-- 输出 **竞品分析**
-- 生成 **产品商业模式**
-- 一键下载产品文档
-"""
-)
