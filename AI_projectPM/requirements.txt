@@ -1,5 +1,5 @@
 streamlit
 requests
 python-docx
-fpdf
+fpdf2
 pandas
