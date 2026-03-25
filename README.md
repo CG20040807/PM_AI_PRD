@@ -146,6 +146,11 @@ ai-product-manager-agent
 的 AI 产品助手。
 
 ---
+## 运行页面展示
+<img width="1496" height="951" alt="屏幕截图 2026-03-25 214005" src="https://github.com/user-attachments/assets/fb80f914-5648-46e9-875d-474b53f92f86" />
+
+<img width="1779" height="959" alt="屏幕截图 2026-03-25 214024" src="https://github.com/user-attachments/assets/29dda55d-f944-4b01-9901-ae10733dbaea" />
+
 
 ## 👨‍💻 作者
 
