@@ -85,8 +85,30 @@ if st.button("生成分析"):
 
         response = requests.post(url,headers=headers,json=data)
 
-        result = response.json()["choices"][0]["text"]
+        try:
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()  # Ensure we raise an error for bad responses
 
+    # 打印返回内容查看实际数据结构
+    print(response.json())
+
+    # 获取返回的内容
+    response_data = response.json()
+
+    # 确保返回数据结构正确
+    if "choices" in response_data and len(response_data["choices"]) > 0:
+        result = response_data["choices"][0].get("text", "No text returned.")
+    else:
+        result = "No valid content returned from the API."
+
+except requests.exceptions.RequestException as e:
+    result = f"请求失败，错误信息: {e}"
+
+except KeyError:
+    result = "API 返回数据格式错误，无法解析。"
+
+except Exception as e:
+    result = f"发生了一个意外错误: {e}"
     st.success("分析完成")
 
     st.markdown("## 📄 AI分析报告")
