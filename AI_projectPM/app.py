@@ -1,7 +1,6 @@
 import streamlit as st
-import requests
-from docx import Document
 import openai
+from docx import Document
 
 # 设置你的 OpenAI API Key
 openai.api_key = "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"
@@ -41,16 +40,28 @@ product_features = st.text_area(
 # 调用OpenAI API并生成报告的函数
 def generate_dynamic_report(product_name, product_category, user_persona, product_features):
     try:
-        # 生成Haiku报告，调用OpenAI API
-        response = openai.Completion.create(
-            model="text-davinci-003",  # GPT-3 模型，可以改为你想用的其他模型
-            prompt=f"Write a detailed product analysis report for the product named {product_name} in the field of {product_category} targeting {user_persona} users. Core features: {product_features}. Include product positioning, user persona, competitive analysis, and roadmap.",
-            max_tokens=500,  # 根据需求调整返回长度
-            temperature=0.7
+        # 使用 ChatCompletion 代替 Completion 接口
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # 使用 GPT-4 模型（你可以根据需要选择其他模型）
+            messages=[
+                {"role": "user", "content": f"""
+分析产品：{product_name}（领域：{product_category}）
+用户画像：{user_persona}
+产品功能：{product_features}
+
+输出内容：
+1. 产品定位分析
+2. 用户画像分析
+3. 竞品分析
+4. 产品功能设计
+5. PRD文档
+6. 产品机会分析
+"""}
+            ]
         )
         
         # 获取返回的文本
-        output_text = response.choices[0].text.strip()
+        output_text = response['choices'][0]['message']['content'].strip()
         
         return output_text
     except Exception as e:
