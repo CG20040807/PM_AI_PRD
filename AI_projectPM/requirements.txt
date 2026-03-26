@@ -1,5 +1,5 @@
 streamlit
 requests
 python-docx
-openai
+json
 io
