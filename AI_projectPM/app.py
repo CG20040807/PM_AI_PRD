@@ -1,24 +1,45 @@
 import streamlit as st
 import requests
 import json
+import os
 from docx import Document
-from io import BytesIO
 
-# 页面配置
+# ===== 页面配置 =====
 st.set_page_config(
     page_title="AI Product Manager Agent",
     page_icon="🚀",
     layout="wide"
 )
 
-# 页面标题
+# ===== UI =====
+st.markdown("""
+<style>
+.title {
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+}
+.subtitle {
+    text-align: center;
+    color: gray;
+    margin-bottom: 30px;
+}
+.card {
+    padding: 20px;
+    border-radius: 12px;
+    background-color: #f5f7fa;
+    margin-bottom: 15px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.markdown('<div class="title">🚀 AI Product Manager Agent</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">输入产品名称，自动生成PRD和竞品分析</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">输入产品名称，一键生成PRD & 竞品分析</div>', unsafe_allow_html=True)
 
-# 产品名称输入框
-product = st.text_input("输入产品名称", placeholder="例如：抖音")
+# ===== 输入 =====
+product = st.text_input("📦 产品名称", placeholder="例如：小红书 / 抖音 / Keep")
 
-# Word生成
+# ===== Word生成 =====
 def generate_word(text):
     doc = Document()
     doc.add_heading("AI 产品分析报告", 0)
@@ -27,75 +48,105 @@ def generate_word(text):
     doc.save(file)
     return file
 
-# 请求API并生成分析报告
+# ===== API =====
 def fetch_product_analysis(product):
-    url = "https://7fv2jsrt7q.coze.site/run"  # 你的API地址
+    url = "https://api.minimax.chat/v1/text/chatcompletion_v2"
+
+    api_key = os.getenv("MINIMAX_API_KEY")  # 从环境变量读取
+
+    if not api_key:
+        st.error("❗ 请先设置 MINIMAX_API_KEY 环境变量")
+        return None
+
     headers = {
-        "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImFlNGZkZTBhLWUzZWItNGRkYi1iYWEzLTg0MzY3MzcyZmQ2ZSJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbInhEUHIydXZyQ053SGlobmU3WWdqNmF4Y09xTWd3RUxIIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzc0NTAyOTU5LCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NjIxMTI5OTQ4MTAyNjU2MDM0Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NjIxNDMyMTc2OTIzMzc3NzAyIn0.FAxF_gfZivpOKuBWCwr6Rc9LvdptUoChcrKfHB_RRUOaz9OSlvPBTpa-LZW3HSPPLl9ipRWnuSceYWbjXL9CiU8jje9SyaxEN76N79MkTufL39nIseP4korE-R_sEGy71XzTtbKuqcZPwxIVqVKNmlk5V_oxk9RnxF3l77PU2EMT11hx9gjoyPXZblcRq45-oJSvccFttCR818kKVi9wv6kYaWATCJZ0CPfwV0DaCKldRJ0K2WVj0VmRS3u0cJsKBvjqPItUR2tQGPSpzW7ITDZjdO5DFOEKkSfjL9wWEih_t9Qvqagf-8vaKa8wFP-f8VT2uwMdjntcQ87TTWxq2Q",  # 使用你自己的API key
+        "Authorization": f"Bearer sk-NjA2LTExNzAzMDI3Mjg0LTE3NzQ1MDY5NDAzNjY=",
         "Content-Type": "application/json"
     }
 
+    prompt = f"""
+你是一个10年经验的互联网产品专家，请对产品「{product}」做系统分析。
+
+输出必须是JSON格式，包含字段：
+positioning_analysis
+competitive_analysis
+prd_document
+opportunity_analysis
+
+要求：
+- 逻辑清晰
+- 结构化输出
+- 可执行
+"""
+
     data = {
-        "product_name": product
+        "model": "abab6.5s-chat",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7
     }
 
-    response = requests.post(url, headers=headers, json=data)
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=60)
 
-    if response.status_code == 200:
-        return response.json()  # 返回JSON格式的报告数据
-    else:
-        st.error("请求失败，请重试。")
+        if response.status_code == 200:
+            res = response.json()
+            content = res["choices"][0]["message"]["content"]
+
+            try:
+                return json.loads(content)
+            except:
+                return {
+                    "positioning_analysis": content,
+                    "competitive_analysis": content,
+                    "prd_document": content,
+                    "opportunity_analysis": content
+                }
+        else:
+            st.error(f"请求失败: {response.text}")
+            return None
+
+    except Exception as e:
+        st.error(f"请求异常: {str(e)}")
         return None
 
-# 一键生成分析报告
-if st.button("生成分析"):
+# ===== 按钮 =====
+if st.button("✨ 一键生成分析"):
     if product:
-        with st.spinner("正在生成分析报告..."):
-            # 调用API获取分析结果
+        with st.spinner("AI 正在分析中... ⏳"):
             result = fetch_product_analysis(product)
 
-            if result:
-                st.success("分析完成")
+        if result:
+            st.success("分析完成 ✅")
 
-                # 输出报告
-                st.markdown("## 📊 AI分析结果")
-                st.markdown(f'<div class="card">{json.dumps(result, ensure_ascii=False, indent=2)}</div>', unsafe_allow_html=True)
+            st.markdown("## 📊 分析结果")
 
-                # 产品定位分析展示
-                with st.expander("🎯 产品定位分析", expanded=True):
-                    st.write(result["positioning_analysis"])
+            with st.expander("🎯 产品定位分析", expanded=True):
+                st.markdown(f'<div class="card">{result["positioning_analysis"]}</div>', unsafe_allow_html=True)
 
-                # 竞品分析展示
-                with st.expander("⚔️ 竞品分析", expanded=True):
-                    st.write(result["competitive_analysis"])
+            with st.expander("⚔️ 竞品分析", expanded=True):
+                st.markdown(f'<div class="card">{result["competitive_analysis"]}</div>', unsafe_allow_html=True)
 
-                # PRD文档展示
-                with st.expander("📄 PRD文档", expanded=True):
-                    st.write(result["prd_document"])
+            with st.expander("📄 PRD文档", expanded=True):
+                st.markdown(f'<div class="card">{result["prd_document"]}</div>', unsafe_allow_html=True)
 
-                # 产品机会分析展示
-                with st.expander("💡 产品机会分析", expanded=True):
-                    st.write(result["opportunity_analysis"])
+            with st.expander("💡 产品机会分析", expanded=True):
+                st.markdown(f'<div class="card">{result["opportunity_analysis"]}</div>', unsafe_allow_html=True)
 
-                # Word文件下载按钮
-                word_file = generate_word(result["prd_document"])  # 生成Word文件
-                with open(word_file, "rb") as file:
-                    st.download_button(
-                        label="下载Word版本报告",
-                        data=file,
-                        file_name="product_analysis_report.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    )
-
-                # JSON下载按钮
+            # 下载 Word
+            word_file = generate_word(result["prd_document"])
+            with open(word_file, "rb") as file:
                 st.download_button(
-                    label="下载PRD JSON版本",
-                    data=json.dumps(result, ensure_ascii=False, indent=2),
-                    file_name="prd_analysis.json",
-                    mime="application/json"
+                    label="📥 下载Word报告",
+                    data=file,
+                    file_name="product_analysis.docx"
                 )
 
-            else:
-                st.error("无法生成报告，请检查输入或API设置。")
+            # 下载 JSON
+            st.download_button(
+                label="📥 下载JSON",
+                data=json.dumps(result, ensure_ascii=False, indent=2),
+                file_name="analysis.json"
+            )
     else:
-        st.warning("请输入产品名称！")
+        st.warning("请输入产品名称 ❗")
