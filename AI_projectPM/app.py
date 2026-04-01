@@ -7,23 +7,28 @@ from io import BytesIO
 from docx import Document
 
 # ======================
-# 基础配置
+# 页面配置
 # ======================
 st.set_page_config(page_title="AI PM Agent", layout="wide")
 
+# ======================
+# 数据文件
+# ======================
 DATA_FILE = "history.json"
 
-# 初始化数据
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
 
 # ======================
-# 工具函数
+# Token 获取
 # ======================
 def get_token():
     return st.secrets.get("COZE_API_TOKEN", os.getenv("COZE_API_TOKEN", ""))
 
+# ======================
+# 历史记录
+# ======================
 def save_history(user, product, result):
     with open(DATA_FILE, "r") as f:
         data = json.load(f)
@@ -45,19 +50,14 @@ def load_history(user):
         data = json.load(f)
     return data.get(user, [])
 
-def generate_word(text):
-    doc = Document()
-    doc.add_heading("AI 产品分析报告", 0)
-    doc.add_paragraph(text)
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    return buffer
-
+# ======================
+# API 调用（关键修复点）
+# ======================
 def call_api(product, workflow_url):
     token = get_token()
+
     if not token:
-        st.error("缺少 COZE_API_TOKEN")
+        st.error("❌ 未配置 COZE_API_TOKEN")
         st.stop()
 
     headers = {
@@ -65,7 +65,10 @@ def call_api(product, workflow_url):
         "Content-Type": "application/json"
     }
 
-    payload = {"query": product}
+    # ✅ 修复点：字段必须是 product_name
+    payload = {
+        "product_name": product
+    }
 
     with st.spinner("AI 分析中..."):
         res = requests.post(workflow_url, headers=headers, json=payload, timeout=120)
@@ -76,17 +79,18 @@ def call_api(product, workflow_url):
         except:
             return {"output": res.text}
     else:
-        st.error(res.text)
+        st.error(f"请求失败: {res.text}")
         return None
 
 # ======================
-# 登录系统
+# 用户登录系统
 # ======================
 if "user" not in st.session_state:
     st.session_state.user = None
 
 if not st.session_state.user:
     st.title("AI Product Manager Agent")
+
     username = st.text_input("请输入用户名")
 
     if st.button("登录"):
@@ -95,15 +99,18 @@ if not st.session_state.user:
             st.rerun()
         else:
             st.warning("请输入用户名")
+
     st.stop()
 
 # ======================
 # 主界面
 # ======================
 st.title("AI Product Manager Agent")
-st.write(f"当前用户：{st.session_state.user}")
+st.write(f"👤 当前用户：{st.session_state.user}")
 
+# ======================
 # Sidebar
+# ======================
 with st.sidebar:
     st.markdown("## ⚙️ 设置")
 
@@ -120,34 +127,45 @@ with st.sidebar:
 
     history = load_history(st.session_state.user)
 
-    for i, item in enumerate(reversed(history)):
-        if st.button(f"{item['product']} - {item['time']}", key=i):
-            st.session_state.selected = item
+    if not history:
+        st.write("暂无记录")
+    else:
+        for i, item in enumerate(reversed(history)):
+            if st.button(f"{item['product']} - {item['time']}", key=i):
+                st.session_state.selected = item
 
-# 输入
-product = st.text_input("输入产品名称", value="Keep")
+# ======================
+# 输入区
+# ======================
+product = st.text_input("📦 输入产品名称", value="Keep")
 
-if st.button("生成分析"):
+if st.button("🚀 生成分析"):
     result = call_api(product, workflow_url)
 
     if result:
         save_history(st.session_state.user, product, result)
 
-        st.success("分析完成")
+        st.success("✅ 分析完成")
 
+        st.markdown("## 📊 分析结果")
         st.json(result)
 
+        # 下载 JSON
         st.download_button(
-            "下载 JSON",
-            data=json.dumps(result, ensure_ascii=False),
+            "⬇️ 下载 JSON",
+            data=json.dumps(result, ensure_ascii=False, indent=2),
             file_name=f"{product}.json"
         )
 
-# 历史详情
+# ======================
+# 历史详情展示
+# ======================
 if "selected" in st.session_state:
-    st.markdown("## 历史详情")
+    st.markdown("## 📂 历史详情")
 
     item = st.session_state.selected
-    st.write("产品：", item["product"])
-    st.write("时间：", item["time"])
+
+    st.write("📦 产品：", item["product"])
+    st.write("🕒 时间：", item["time"])
+
     st.json(item["result"])
