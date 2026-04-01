@@ -4,7 +4,7 @@ from utils.formatter import format_result
 from utils.docx_generator import generate_docx
 import sys
 import os
-
+from AI_projectPM.app import *
 
 # 强制把项目根目录加入路径（关键！）
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
