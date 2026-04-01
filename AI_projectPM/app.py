@@ -2,7 +2,9 @@ import streamlit as st
 from utils.api import call_coze_api
 from utils.formatter import format_result
 from utils.docx_generator import generate_docx
-
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 st.set_page_config(page_title="AI PRD生成器", layout="wide")
 
 st.title("📄 AI 产品需求文档生成器（PRD）")
