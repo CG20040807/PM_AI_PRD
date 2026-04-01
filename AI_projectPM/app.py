@@ -2,102 +2,48 @@ import streamlit as st
 import requests
 import json
 import os
+import datetime
 from io import BytesIO
 from docx import Document
 
-# =========================
-# 页面配置
-# =========================
-st.set_page_config(
-    page_title="AI PM Agent",
-    page_icon="🚀",
-    layout="wide"
-)
+# ======================
+# 基础配置
+# ======================
+st.set_page_config(page_title="AI PM Agent", layout="wide")
 
-# =========================
-# UI 样式（重点升级）
-# =========================
-st.markdown("""
-<style>
-.main-title {
-    font-size: 42px;
-    font-weight: 800;
-    margin-bottom: 5px;
-}
-.sub-title {
-    color: #666;
-    margin-bottom: 30px;
-}
+DATA_FILE = "history.json"
 
-.block {
-    background: #FFFFFF;
-    padding: 20px;
-    border-radius: 14px;
-    border: 1px solid #eee;
-    margin-bottom: 15px;
-}
+# 初始化数据
+if not os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "w") as f:
+        json.dump({}, f)
 
-.metric-card {
-    background: #000;
-    color: white;
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-}
-
-.card-title {
-    font-weight: 700;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.result-card {
-    background: #F7F7F7;
-    padding: 18px;
-    border-radius: 12px;
-    line-height: 1.7;
-    white-space: pre-wrap;
-}
-
-button[kind="primary"] {
-    background-color: black !important;
-    border-radius: 10px !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# =========================
-# 顶部
-# =========================
-st.markdown('<div class="main-title">AI Product Manager Agent</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">一键生成 PRD / 竞品分析 / 产品机会点</div>', unsafe_allow_html=True)
-
-# =========================
-# Sidebar（产品感增强）
-# =========================
-with st.sidebar:
-    st.markdown("## ⚙️ 系统配置")
-
-    workflow_url = st.text_input(
-        "Coze 工作流地址",
-        value="https://7fv2jsrt7q.coze.site/run"
-    )
-
-    st.markdown("---")
-    st.markdown("## 📊 使用说明")
-    st.write("1. 输入产品名称")
-    st.write("2. 点击生成")
-    st.write("3. 下载报告")
-
-    st.markdown("---")
-    st.markdown("## 🔐 Secrets")
-    st.code('COZE_API_TOKEN = "xxx"')
-
-# =========================
+# ======================
 # 工具函数
-# =========================
+# ======================
 def get_token():
     return st.secrets.get("COZE_API_TOKEN", os.getenv("COZE_API_TOKEN", ""))
+
+def save_history(user, product, result):
+    with open(DATA_FILE, "r") as f:
+        data = json.load(f)
+
+    if user not in data:
+        data[user] = []
+
+    data[user].append({
+        "product": product,
+        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "result": result
+    })
+
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def load_history(user):
+    with open(DATA_FILE, "r") as f:
+        data = json.load(f)
+    return data.get(user, [])
 
 def generate_word(text):
     doc = Document()
@@ -108,8 +54,12 @@ def generate_word(text):
     buffer.seek(0)
     return buffer
 
-def call_api(product):
+def call_api(product, workflow_url):
     token = get_token()
+    if not token:
+        st.error("缺少 COZE_API_TOKEN")
+        st.stop()
+
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
@@ -117,7 +67,7 @@ def call_api(product):
 
     payload = {"query": product}
 
-    with st.spinner("AI 正在分析中..."):
+    with st.spinner("AI 分析中..."):
         res = requests.post(workflow_url, headers=headers, json=payload, timeout=120)
 
     if res.status_code == 200:
@@ -126,85 +76,78 @@ def call_api(product):
         except:
             return {"output": res.text}
     else:
-        st.error("请求失败")
+        st.error(res.text)
         return None
 
-# =========================
-# 输入区（产品化）
-# =========================
-col1, col2 = st.columns([3,1])
+# ======================
+# 登录系统
+# ======================
+if "user" not in st.session_state:
+    st.session_state.user = None
 
-with col1:
-    product = st.text_input("📦 输入产品名称", placeholder="例如：Keep / 小红书 / ChatGPT")
+if not st.session_state.user:
+    st.title("AI Product Manager Agent")
+    username = st.text_input("请输入用户名")
 
-with col2:
-    run = st.button("生成分析", use_container_width=True)
+    if st.button("登录"):
+        if username:
+            st.session_state.user = username
+            st.rerun()
+        else:
+            st.warning("请输入用户名")
+    st.stop()
 
-# =========================
-# 数据统计（增强产品感）
-# =========================
-st.markdown("### 📊 系统状态")
+# ======================
+# 主界面
+# ======================
+st.title("AI Product Manager Agent")
+st.write(f"当前用户：{st.session_state.user}")
 
-col1, col2, col3 = st.columns(3)
-col1.markdown('<div class="metric-card">⚡ AI引擎<br><b>Online</b></div>', unsafe_allow_html=True)
-col2.markdown('<div class="metric-card">📈 分析能力<br><b>PRD + 竞品</b></div>', unsafe_allow_html=True)
-col3.markdown('<div class="metric-card">⏱ 响应时间<br><b>30-90s</b></div>', unsafe_allow_html=True)
+# Sidebar
+with st.sidebar:
+    st.markdown("## ⚙️ 设置")
 
-# =========================
-# 主逻辑
-# =========================
-if run:
-    if not product:
-        st.warning("请输入产品名称")
-    else:
-        result = call_api(product)
+    workflow_url = st.text_input(
+        "Coze 工作流地址",
+        value="https://7fv2jsrt7q.coze.site/run"
+    )
 
-        if result:
-            st.success("分析完成")
+    if st.button("退出登录"):
+        st.session_state.user = None
+        st.rerun()
 
-            data = result.get("data") or result.get("output") or result
+    st.markdown("## 📜 历史记录")
 
-            if isinstance(data, str):
-                try:
-                    data = json.loads(data)
-                except:
-                    pass
+    history = load_history(st.session_state.user)
 
-            positioning = data.get("positioning_analysis", "")
-            comp = data.get("competitive_analysis", "")
-            prd = data.get("prd_document", "")
-            opp = data.get("opportunity_analysis", "")
+    for i, item in enumerate(reversed(history)):
+        if st.button(f"{item['product']} - {item['time']}", key=i):
+            st.session_state.selected = item
 
-            st.markdown("## 📊 分析结果")
+# 输入
+product = st.text_input("输入产品名称", value="Keep")
 
-            col1, col2 = st.columns(2)
+if st.button("生成分析"):
+    result = call_api(product, workflow_url)
 
-            with col1:
-                st.markdown('<div class="block"><div class="card-title">🎯 产品定位</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="result-card">{positioning}</div></div>', unsafe_allow_html=True)
+    if result:
+        save_history(st.session_state.user, product, result)
 
-                st.markdown('<div class="block"><div class="card-title">⚔️ 竞品分析</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="result-card">{comp}</div></div>', unsafe_allow_html=True)
+        st.success("分析完成")
 
-            with col2:
-                st.markdown('<div class="block"><div class="card-title">📄 PRD 文档</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="result-card">{prd}</div></div>', unsafe_allow_html=True)
+        st.json(result)
 
-                st.markdown('<div class="block"><div class="card-title">💡 机会分析</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="result-card">{opp}</div></div>', unsafe_allow_html=True)
+        st.download_button(
+            "下载 JSON",
+            data=json.dumps(result, ensure_ascii=False),
+            file_name=f"{product}.json"
+        )
 
-            # 下载
-            st.markdown("### 📥 下载报告")
-            col1, col2 = st.columns(2)
+# 历史详情
+if "selected" in st.session_state:
+    st.markdown("## 历史详情")
 
-            col1.download_button(
-                "下载 Word",
-                data=generate_word(prd),
-                file_name=f"{product}_PRD.docx"
-            )
-
-            col2.download_button(
-                "下载 JSON",
-                data=json.dumps(result, ensure_ascii=False),
-                file_name=f"{product}.json"
-            )
+    item = st.session_state.selected
+    st.write("产品：", item["product"])
+    st.write("时间：", item["time"])
+    st.json(item["result"])
