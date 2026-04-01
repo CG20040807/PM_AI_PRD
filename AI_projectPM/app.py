@@ -71,7 +71,7 @@ def call_api(product, workflow_url):
     }
 
     with st.spinner("AI 分析中..."):
-        res = requests.post(workflow_url, headers=headers, json=payload, timeout=120)
+        res = requests.post(workflow_url, headers=headers, json=payload, timeout=600)
 
     if res.status_code == 200:
         try:
