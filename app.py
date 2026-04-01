@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ======================
-# 样式
+# 样式（优化）
 # ======================
 st.markdown("""
 <style>
@@ -42,12 +42,12 @@ st.markdown("""
 }
 
 .card {
-    padding: 16px;
-    border-radius: 10px;
-    background-color: #f8f9fb;
-    border: 1px solid #e6e8eb;
-    margin-bottom: 12px;
-    white-space: pre-wrap;
+    padding: 14px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    border-left: 4px solid #000;
+    margin-bottom: 8px;
+    line-height: 1.6;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -56,7 +56,35 @@ st.markdown("""
 # 标题
 # ======================
 st.markdown('<div class="main-title">📄 AI 产品需求文档生成器</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">输入产品名称，一键生成 PRD + 结构化分析</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">输入产品名称，一键生成结构化 PRD（可导出）</div>', unsafe_allow_html=True)
+
+# ======================
+# ⭐ 新增：内容结构化渲染函数（核心）
+# ======================
+def render_content(content: str):
+    if not content:
+        st.markdown('<div class="card">暂无内容</div>', unsafe_allow_html=True)
+        return
+
+    lines = content.split("\n")
+
+    for line in lines:
+        line = line.strip()
+
+        if not line:
+            continue
+
+        # 小标题（###）
+        if line.startswith("###"):
+            st.markdown(f"**{line.replace('###', '').strip()}**")
+
+        # 列表（-）
+        elif line.startswith("-"):
+            st.markdown(f"- {line[1:].strip()}")
+
+        # 普通段落
+        else:
+            st.markdown(f"<div class='card'>{line}</div>", unsafe_allow_html=True)
 
 # ======================
 # 输入区域（居中）
@@ -80,9 +108,7 @@ if generate:
         st.warning("请输入产品名称")
         st.stop()
 
-    # ======================
     # 调用 Coze
-    # ======================
     with st.spinner("AI 生成中，请稍候..."):
         result = call_coze_api(product.strip())
 
@@ -90,21 +116,19 @@ if generate:
         st.error("生成失败，请检查 API 或工作流")
         st.stop()
 
-    # ======================
-    # 格式化数据
-    # ======================
+    # 格式化
     doc_data = format_result(result)
 
     st.success("生成成功 🎉")
 
     # ======================
-    # 展示 PRD
+    # ⭐ PRD展示（重点优化）
     # ======================
     st.markdown("## 📊 PRD 预览")
 
     for section in doc_data:
-        with st.expander(section["title"], expanded=True):
-            st.markdown(f'<div class="card">{section["content"]}</div>', unsafe_allow_html=True)
+        with st.expander(f"📌 {section['title']}", expanded=True):
+            render_content(section["content"])
 
     # ======================
     # Word 导出
@@ -124,4 +148,4 @@ if generate:
 # 默认提示
 # ======================
 else:
-    st.info("请输入产品名称并点击【生成 PRD】开始 🚀")
+    st.info("👆 输入产品名称并点击【生成 PRD】开始")
