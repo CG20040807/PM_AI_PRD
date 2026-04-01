@@ -1,35 +1,27 @@
-def format_result(result_json):
-    """
-    把 Coze 返回的 JSON 转换为结构化文档
-    """
+def format_result(result):
 
-    # 这里根据你的 Coze 输出结构调整
-    # 假设返回类似：
-    # {
-    #   "title": "...",
-    #   "sections": [...]
-    # }
+    import json
 
-    doc = []
+    if isinstance(result, str):
+        try:
+            result = json.loads(result)
+        except:
+            return [{"title": "结果", "content": result}]
 
-    if "title" in result_json:
-        doc.append({
-            "title": "标题",
-            "content": result_json["title"]
-        })
+    data = result.get("data") or result.get("output") or result
 
-    if "sections" in result_json:
-        for sec in result_json["sections"]:
-            doc.append({
-                "title": sec.get("name", "模块"),
-                "content": sec.get("content", "")
-            })
+    def get_val(keys):
+        for k in keys:
+            if isinstance(data, dict) and k in data:
+                val = data[k]
+                if isinstance(val, (dict, list)):
+                    return json.dumps(val, ensure_ascii=False, indent=2)
+                return str(val)
+        return "暂无数据"
 
-    # fallback（防止结构不一致）
-    if not doc:
-        doc.append({
-            "title": "原始输出",
-            "content": str(result_json)
-        })
-
-    return doc
+    return [
+        {"title": "一、产品定位", "content": get_val(["positioning_analysis"])},
+        {"title": "二、竞品分析", "content": get_val(["competitive_analysis"])},
+        {"title": "三、机会分析", "content": get_val(["opportunity_analysis"])},
+        {"title": "四、PRD设计", "content": get_val(["prd_document"])}
+    ]
