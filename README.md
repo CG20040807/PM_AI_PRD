@@ -1,4 +1,4 @@
-# 🎉 AI 产品需求文档生成器 (AI PRD Generator) 🎉
+#  AI 产品需求文档生成器 (AI PRD Generator) 
 ![Stars](https://img.shields.io/github/stars/CG20040807/PM_AI_PRD?style=social)
 ![License](https://img.shields.io/github/license/CG20040807/PM_AI_PRD)
 ![Repo Size](https://img.shields.io/github/repo-size/CG20040807/PM_AI_PRD)
