@@ -1,6 +1,8 @@
-````markdown
-### 🎉 AI 产品需求文档生成器 (AI PRD Generator) 🎉
-
+# 🎉 AI 产品需求文档生成器 (AI PRD Generator) 🎉
+![Stars](https://img.shields.io/github/stars/CG20040807/PM_AI_PRD?style=social)
+![License](https://img.shields.io/github/license/CG20040807/PM_AI_PRD)
+![Repo Size](https://img.shields.io/github/repo-size/CG20040807/PM_AI_PRD)
+![Last Commit](https://img.shields.io/github/last-commit/CG20040807/PM_AI_PRD)
 ## 📝 项目概述
 
 AI 产品需求文档生成器（AI PRD Generator）是一款创新的产品需求文档自动化生成工具，专为产品经理、团队和从业人员设计。通过简单的产品名称输入，系统能够自动生成结构化的 PRD（产品需求文档），涵盖产品定位、竞品分析、功能需求和用户故事等内容。您只需提供产品名称，系统会通过强大的 API 功能，生成全面的产品文档，并支持导出 Word 文档，轻松分享与存档。
@@ -131,13 +133,7 @@ streamlit run app.py
 
 感谢你对 AI PRD Generator 的关注和支持！如果你喜欢这个项目，请给我们一个 ⭐️ 星标支持，帮助更多人发现这个工具！
 
----
 
-## 🏆 关注我们
-
-* [GitHub](https://github.com/your-username/ai-prd-generator)
-* [Twitter](https://twitter.com/your-username)
-* [LinkedIn](https://www.linkedin.com/in/your-profile)
 
 ---
 
